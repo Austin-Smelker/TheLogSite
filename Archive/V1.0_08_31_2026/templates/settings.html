@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Settings — {{ site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title settings-title">Settings</h1>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">Username</h2>
+  <form method="post" action="{{ url_for('update_username_route') }}" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>Username</span>
+      <input type="text" name="username" value="{{ username_value }}" minlength="3" maxlength="30" required>
+      <span class="field-hint">3–30 characters. Spaces are allowed.</span>
+    </label>
+    <button type="submit" class="btn btn-primary btn-full">Save username</button>
+  </form>
+</section>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">Appearance</h2>
+  <form method="post" action="{{ url_for('update_theme_route') }}" class="settings-inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="next" value="{{ url_for('settings') }}">
+    <div class="segmented" id="themeSegmented">
+      <button type="submit" name="theme" value="light" class="seg-btn {{ 'is-selected' if current_user.theme == 'light' else '' }}">Light</button>
+      <button type="submit" name="theme" value="dark" class="seg-btn {{ 'is-selected' if current_user.theme == 'dark' else '' }}">Dark</button>
+    </div>
+  </form>
+</section>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">Premium</h2>
+  <p class="field-hint settings-note">
+    Unlocks notifications on this device and adding photos to your runs.
+    (This is just a self-serve flag for now — flip it whenever.)
+  </p>
+  <form method="post" action="{{ url_for('update_premium_route') }}" class="settings-inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="segmented">
+      <button type="submit" name="premium" value="" formnovalidate class="seg-btn {{ '' if current_user.premium else 'is-selected' }}">Off</button>
+      <button type="submit" name="premium" value="on" class="seg-btn {{ 'is-selected' if current_user.premium else '' }}">On</button>
+    </div>
+  </form>
+</section>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">Notifications on this device</h2>
+  {% if not current_user.premium %}
+  <p class="field-hint settings-note settings-locked">&#128274; Premium feature — turn on Premium above to enable notifications.</p>
+  {% else %}
+  {% if not pywebpush_available %}
+  <p class="field-hint settings-note">
+    This install hasn't got the push-sending library set up yet (server-side —
+    nothing for you to do here). Preferences below still save either way.
+  </p>
+  {% endif %}
+  <p class="field-hint settings-note">
+    Turn on notifications to get an alert on this device — even when
+    {{ site_name }} isn't open — for the categories you pick below.
+  </p>
+  <button type="button" id="pushEnableBtn" class="btn btn-primary btn-full">Enable notifications on this device</button>
+  <button type="button" id="pushDisableBtn" class="btn btn-ghost btn-full" hidden>Turn off notifications on this device</button>
+  <p id="pushStatus" class="field-hint settings-note"></p>
+  {% endif %}
+</section>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">What to be notified about</h2>
+  {% if not current_user.premium %}
+  <p class="field-hint settings-note settings-locked">&#128274; Premium feature — turn on Premium above to choose what you're notified about.</p>
+  {% else %}
+  <form method="post" action="{{ url_for('update_notifications_route') }}" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="checkbox-field">
+      <input type="checkbox" name="notify_comments" {{ 'checked' if current_user.notify_comments else '' }}>
+      <span>Comments on your log</span>
+    </label>
+    <label class="checkbox-field">
+      <input type="checkbox" name="notify_replies" {{ 'checked' if current_user.notify_replies else '' }}>
+      <span>Replies to your comments</span>
+    </label>
+    <label class="checkbox-field">
+      <input type="checkbox" name="notify_starred_posts" {{ 'checked' if current_user.notify_starred_posts else '' }}>
+      <span>Starred users posting logs</span>
+    </label>
+
+    <h3 class="settings-subheading">Silent hours</h3>
+    <p class="field-hint settings-note">No notifications will be sent during this window. Leave both blank for none. Times are this server's local clock.</p>
+    <div class="form-grid">
+      <label class="field">
+        <span>From</span>
+        <input type="time" name="silent_start" value="{{ current_user.silent_start or '' }}">
+      </label>
+      <label class="field">
+        <span>To</span>
+        <input type="time" name="silent_end" value="{{ current_user.silent_end or '' }}">
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-full">Save notification settings</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="auth-card settings-card">
+  <h2 class="settings-heading">Starred users</h2>
+  <p class="field-hint settings-note">
+    You've starred {{ star_count }} of {{ max_stars }} runners. Star runners from
+    the <a href="{{ url_for('team') }}">My Team</a> page to pin them to the top
+    of the grid and get notified when they log a run.
+  </p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>window.HAS_PUSH_SUBSCRIPTION = {{ has_push_subscription | tojson }};</script>
+{% endblock %}

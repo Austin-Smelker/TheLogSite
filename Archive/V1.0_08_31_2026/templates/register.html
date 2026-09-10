@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Sign up — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1 class="page-title">Create an account</h1>
+  <form method="post" action="{{ url_for('register') }}" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" value="{{ email }}" autocomplete="email" required autofocus>
+    </label>
+    <label class="field">
+      <span>Username</span>
+      <input type="text" name="username" value="{{ username }}" autocomplete="username" minlength="3" maxlength="30" required>
+      <span class="field-hint">3–30 characters: letters, numbers, underscore, period, or hyphen.</span>
+    </label>
+    <label class="field">
+      <span>Password</span>
+      <input type="password" name="password" autocomplete="new-password" minlength="8" required>
+      <span class="field-hint">At least 8 characters.</span>
+    </label>
+    <button type="submit" class="btn btn-primary btn-full">Create account</button>
+  </form>
+  <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+</section>
+{% endblock %}

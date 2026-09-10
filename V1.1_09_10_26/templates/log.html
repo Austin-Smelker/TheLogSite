@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% from "_run_row.html" import run_row with context %}
+{% from "_chart.html" import svg_bar_chart, chart_legend %}
+{% block title %}{{ 'Home' if editable else profile_user.username }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="charts">
+  <div class="chart-card">
+    <h2 class="chart-title">Weekly Mileage</h2>
+    {{ svg_bar_chart(mileage_chart, 'mi') }}
+  </div>
+  <div class="chart-card">
+    <h2 class="chart-title">Weekly Time</h2>
+    {{ svg_bar_chart(time_chart, 'hr') }}
+  </div>
+</section>
+{{ chart_legend(chart_legend_items) }}
+
+<section class="log-header">
+  <h1 class="page-title">
+    {% if editable %}Run Log{% else %}{{ profile_user.username }}'s Log{% endif %}
+  </h1>
+  {% if editable %}
+  <button type="button" class="btn btn-primary" id="openAddRun">+ Log a run</button>
+  {% endif %}
+</section>
+
+<section class="log">
+  {% if not has_any_runs %}
+    <div class="empty-state">
+      {% if editable %}
+      <p>Nothing logged yet.</p>
+      <p class="empty-sub">Log your first run and this table — and the charts above — will fill in.</p>
+      {% else %}
+      <p>{{ profile_user.username }} hasn't logged any runs yet.</p>
+      {% endif %}
+    </div>
+  {% else %}
+  <div class="table-scroll">
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>AM/PM</th>
+          <th>Activity</th>
+          <th>Shoes</th>
+          <th class="num">Distance</th>
+          <th class="num">Time</th>
+          <th class="num">Sleep</th>
+          <th class="num">RHR</th>
+          <th class="num">Quality</th>
+          <th>Description</th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in weeks %}
+        <tr class="week-divider">
+          <td colspan="11">
+            <div class="week-divider-inner">
+              <span class="week-label">Week of {{ week.label }}</span>
+              <span class="week-totals">{{ week.total_distance }} mi &middot; {{ week.total_time_display }}</span>
+            </div>
+          </td>
+        </tr>
+        {% for run in week.runs %}
+          {{ run_row(run, editable) }}
+        {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="log-footnote">Showing the most recent {{ weeks|length }} week{{ 's' if weeks|length != 1 else '' }} of training.</p>
+  {% endif %}
+</section>
+
+{% if editable %}
+<div class="modal-overlay" id="runModalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="runModalTitle">Log a run</h2>
+      <button type="button" class="modal-close" id="closeAddRun" aria-label="Close">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('save_run') }}" id="runForm" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="run_id" id="field-run-id" value="">
+
+      <div class="form-grid">
+        <label class="field">
+          <span>Date</span>
+          <input type="date" name="date" id="field-date" value="{{ today }}" required>
+        </label>
+
+        <label class="field">
+          <span>AM / PM</span>
+          <div class="segmented" id="ampmSegmented">
+            <button type="button" class="seg-btn" data-value="AM">AM</button>
+            <button type="button" class="seg-btn" data-value="PM">PM</button>
+          </div>
+          <input type="hidden" name="am_pm" id="field-am-pm" value="AM">
+        </label>
+
+        <label class="field">
+          <span>Activity type</span>
+          <select name="activity_type" id="field-activity-type" required>
+            {% for t in activity_types %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Shoes</span>
+          <select name="shoe_id" id="field-shoe-id">
+            <option value="">— none —</option>
+            {% for s in active_shoes %}
+            <option value="{{ s.id }}">{{ s.nickname or (s.brand ~ ' ' ~ s.model) }}</option>
+            {% endfor %}
+            {% if retired_shoes %}
+            <optgroup label="Retired">
+              {% for s in retired_shoes %}
+              <option value="{{ s.id }}">{{ s.nickname or (s.brand ~ ' ' ~ s.model) }}</option>
+              {% endfor %}
+            </optgroup>
+            {% endif %}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Distance (mi)</span>
+          <input type="number" step="0.01" min="0" name="distance" id="field-distance" placeholder="6.2">
+        </label>
+
+        <label class="field">
+          <span>Time</span>
+          <input type="text" name="time" id="field-time" placeholder="mm:ss or h:mm:ss">
+        </label>
+
+        <label class="field">
+          <span>Previous night's sleep (hr)</span>
+          <input type="number" step="0.1" min="0" name="sleep_hours" id="field-sleep-hours" placeholder="7.5">
+        </label>
+
+        <label class="field">
+          <span>Morning resting HR</span>
+          <input type="number" step="1" min="0" name="resting_hr" id="field-resting-hr" placeholder="52">
+        </label>
+
+        <label class="field">
+          <span>Run quality (1–10)</span>
+          <select name="quality" id="field-quality">
+            <option value="">—</option>
+            {% for q in quality_choices %}
+            <option value="{{ q }}">{{ q }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        {% if current_user.gender == 'Female' %}
+        <label class="checkbox-field field-wide">
+          <input type="checkbox" name="menstruating" id="field-menstruating">
+          <span>Menstruating</span>
+        </label>
+        {% endif %}
+
+        <label class="field field-wide">
+          <span>Description</span>
+          <textarea name="description" id="field-description" rows="3" maxlength="4000" placeholder="How it felt, splits, weather, anything worth remembering."></textarea>
+        </label>
+
+        <div class="field field-wide">
+          {% if current_user.premium %}
+          <span>Photos (paste a link or choose a file — up to {{ max_images }})</span>
+          <div class="image-inputs">
+            {% for i in range(1, max_images + 1) %}
+            <div class="image-input-row">
+              <input type="url" name="image_url_{{ i }}" id="field-image-url-{{ i }}" placeholder="https://…">
+              <span class="image-input-or">or</span>
+              <input type="file" name="image_file_{{ i }}" id="field-image-file-{{ i }}" accept="image/jpeg,image/png,image/gif,image/webp">
+            </div>
+            {% endfor %}
+          </div>
+          <span class="field-hint">Photos up to 6MB each (JPEG, PNG, GIF, or WEBP).</span>
+          {% else %}
+          <span>Photos</span>
+          <p class="field-hint settings-locked">&#128274; Adding photos is a premium feature — turn on Premium in <a href="{{ url_for('settings') }}">Settings</a> to attach photos to this run.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelAddRun">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save run</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

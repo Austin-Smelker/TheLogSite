@@ -1,0 +1,1113 @@
+/* =========================================================================
+   OPERATOR-CUSTOMIZABLE APPEARANCE
+   -------------------------------------------------------------------------
+   Everything in this block is meant to be edited by whoever runs the
+   site — change a value here and it updates everywhere that color is
+   used. Below the light-mode (default) values is a matching dark-mode
+   block for when a user switches themes in Settings.
+
+   Palette concept: pulled from a track surface — clay (the rubber),
+   turf (the infield), chalk paper, and an amber scoreboard accent used
+   sparingly. You don't have to keep that theme; these are just plain
+   CSS colors and can be replaced with anything.
+========================================================================= */
+:root {
+  /* Page background — the area behind the white content cards. */
+  --paper: #eeede7;
+
+  /* Card / table background color. */
+  --surface: #ffffff;
+  /* A slightly darker "sunken" surface — used for table stripes, input
+     backgrounds, and the expanded run-details panel. */
+  --surface-sunken: #f6f5f0;
+
+  /* Main body text color. */
+  --ink: #1e2a24;
+  /* Secondary text — labels, captions. */
+  --ink-soft: #58614f;
+  /* Faint text — placeholders, footnotes, disabled-looking text. */
+  --ink-faint: #8a8f80;
+
+  /* HEADER COLOR: see the dedicated --header-bg / --header-text /
+     --header-text-muted tokens near the end of this block — kept
+     separate from body text color so the header can be its own color
+     independent of the light/dark theme. */
+
+  /* Primary accent — buttons, links, the active nav underline. */
+  --clay: #b14a2e;
+  --clay-dark: #8f3a22;
+  --clay-tint: #f3e1da;
+
+  /* Secondary accent — success states, one of the chart colors. */
+  --turf: #3f6b4a;
+  --turf-tint: #e2ecdf;
+
+  /* Tertiary accent — used sparingly (one of the chart colors). */
+  --amber: #c9891f;
+
+  /* Hairline colors: --lane for dividers/borders in controls, --grid-line
+     for the light grey table-cell borders. */
+  --lane: #d8d3c4;
+  --lane-strong: #c3bda9;
+  --grid-line: #e1ddd1;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --shadow-card: 0 1px 2px rgba(30, 42, 36, 0.06), 0 8px 24px -12px rgba(30, 42, 36, 0.18);
+  --shadow-modal: 0 24px 60px -20px rgba(20, 28, 24, 0.45);
+
+  /* HEADER COLOR — deliberately its own tokens rather than reusing --ink,
+     so the top bar can stay a fixed dark bar (or be changed to anything)
+     independently of the light/dark body theme. Used by .topbar and the
+     other dark banners (week dividers) further down. */
+  --header-bg: #1e2a24;
+  --header-text: #f4f2ea;
+  --header-text-muted: #c7c3b6;
+}
+
+/* Dark mode — applied when a user picks "Dark" in Settings, via
+   <html data-theme="dark">. Same token names as above, just re-pointed
+   at darker/lighter values so nothing else in the stylesheet needs to
+   change. Edit these to adjust dark mode specifically. */
+[data-theme="dark"] {
+  --paper: #14181a;
+  --surface: #1d2224;
+  --surface-sunken: #262c2e;
+
+  --ink: #e8e6df;
+  --ink-soft: #aab0a6;
+  --ink-faint: #767d75;
+
+  --clay: #d9744f;
+  --clay-dark: #f0956e;
+  --clay-tint: #3a2620;
+
+  --turf: #74b088;
+  --turf-tint: #1f3327;
+
+  --amber: #dba645;
+
+  --lane: #3a4042;
+  --lane-strong: #4a5052;
+  --grid-line: #2e3436;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-modal: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
+
+  /* Header stays the same fixed dark bar in both themes by default —
+     override these here if you'd rather it shift with dark mode too. */
+  --header-bg: #14181a;
+  --header-text: #f4f2ea;
+  --header-text-muted: #9aa39c;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Top bar
+--------------------------------------------------------------------- */
+.topbar {
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.topbar-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.wordmark {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--header-text);
+  position: relative;
+  padding-left: 16px;
+}
+
+.wordmark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 5px;
+  background: var(--clay);
+  border-radius: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  height: 100%;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 4px;
+  margin-right: 24px;
+  text-decoration: none;
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--header-text-muted);
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover { color: var(--header-text); }
+
+.tab.is-active {
+  color: var(--header-text);
+  border-bottom-color: var(--clay);
+}
+
+/* ---------------------------------------------------------------------
+   Layout
+--------------------------------------------------------------------- */
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+}
+
+.page-title {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 40px 0 18px;
+}
+
+/* ---------------------------------------------------------------------
+   Flash messages
+--------------------------------------------------------------------- */
+.flash-wrap {
+  max-width: 1180px;
+  margin: 18px auto 0;
+  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.flash {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.flash-success {
+  background: var(--turf-tint);
+  color: var(--turf);
+  border: 1px solid #c4d9c1;
+}
+
+.flash-error {
+  background: var(--clay-tint);
+  color: var(--clay-dark);
+  border: 1px solid #e3bfb0;
+}
+
+/* ---------------------------------------------------------------------
+   Buttons
+--------------------------------------------------------------------- */
+.btn {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--clay);
+  color: #fbf5f1;
+}
+
+.btn-primary:hover { background: var(--clay-dark); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--lane-strong);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------
+   Charts
+--------------------------------------------------------------------- */
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px 22px 14px;
+}
+
+.chart-title {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+/* ---------------------------------------------------------------------
+   Log table
+--------------------------------------------------------------------- */
+.log {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+.log-table thead th {
+  text-align: left;
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 14px 16px 10px;
+  border: 1px solid var(--grid-line);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.log-table th.num, .log-table td.num {
+  text-align: right;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.log-table td {
+  padding: 10px 16px;
+  border: 1px solid var(--grid-line);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.log-table td.desc {
+  white-space: normal;
+  color: var(--ink-soft);
+  min-width: 180px;
+}
+
+.run-row:hover td {
+  background: var(--surface-sunken);
+}
+
+/* the "split bar" — the signature element. Each week break reports its
+   own totals, like a lap split on a stopwatch. */
+.week-divider td {
+  padding: 0;
+  border: none;
+}
+
+.week-divider-inner {
+  background: var(--header-bg);
+  color: var(--header-text);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 20px;
+  border-left: 5px solid var(--clay);
+}
+
+.week-label {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.week-totals {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: #d9b98e;
+}
+
+.actions-col {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.icon-btn:hover { color: var(--ink); background: var(--surface-sunken); }
+.icon-btn.danger:hover { color: var(--clay-dark); }
+.icon-btn.accent { color: var(--turf); }
+
+.inline-form { display: inline; }
+
+.log-footnote {
+  padding: 12px 20px 18px;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------------------
+   Shoe status pill
+--------------------------------------------------------------------- */
+.status-pill {
+  display: inline-block;
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.status-active {
+  background: var(--turf-tint);
+  color: var(--turf);
+}
+
+.status-retired {
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+}
+
+tr.is-retired td { color: var(--ink-faint); }
+
+/* ---------------------------------------------------------------------
+   Empty state
+--------------------------------------------------------------------- */
+.empty-state {
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.empty-state p { margin: 4px 0; }
+.empty-sub { color: var(--ink-faint); font-size: 14px; }
+
+/* ---------------------------------------------------------------------
+   Modal
+--------------------------------------------------------------------- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 20, 0.5);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--surface-sunken);
+}
+
+.modal-header h2 {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-faint);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.modal-close:hover { color: var(--ink); }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 22px 24px 6px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.field-wide { grid-column: 1 / -1; }
+
+.field input, .field select, .field textarea {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 14.5px;
+  color: var(--ink);
+  background: var(--surface-sunken);
+  border: 1px solid var(--lane);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--clay);
+  background: var(--surface);
+}
+
+.field textarea { resize: vertical; font-family: "IBM Plex Sans", sans-serif; }
+
+.field.is-disabled { opacity: 0.45; }
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--lane);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.seg-btn {
+  background: var(--surface-sunken);
+  border: none;
+  padding: 9px 20px;
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.seg-btn + .seg-btn { border-left: 1px solid var(--lane); }
+
+.seg-btn.is-selected {
+  background: var(--clay);
+  color: #fbf5f1;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 24px 24px;
+}
+
+/* ---------------------------------------------------------------------
+   Responsive
+--------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  .charts { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .log-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .topbar-inner { padding: 0 18px; gap: 20px; }
+  .page { padding: 24px 16px 60px; }
+}
+
+/* ---------------------------------------------------------------------
+   Auth pages
+--------------------------------------------------------------------- */
+.topbar-user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar-username-link {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  color: var(--header-text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.topbar-username-link:hover,
+.topbar-username-link.is-active {
+  border-bottom-color: var(--clay);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--header-text-muted);
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.link-btn:hover { color: var(--header-text); }
+
+.topbar-inner .tabs { margin-right: 0; }
+
+.auth-card {
+  max-width: 420px;
+  margin: 40px auto 0;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px 30px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.btn-full { width: 100%; margin-top: 4px; }
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
+
+.btn-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.auth-switch {
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.auth-switch a { color: var(--clay); font-weight: 600; text-decoration: none; }
+.auth-switch a:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------------------
+   Week / day navigation (My Team)
+--------------------------------------------------------------------- */
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.week-nav-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: var(--ink-soft);
+  min-width: 170px;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------
+   My Team grid
+--------------------------------------------------------------------- */
+.team-grid th a {
+  text-decoration: none;
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+
+.team-grid th a:hover { color: var(--clay); }
+
+.runner-link {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.runner-link:hover { color: var(--clay); }
+
+.team-cell {
+  text-align: right;
+  font-family: "IBM Plex Mono", monospace;
+  cursor: default;
+  color: var(--ink-soft);
+}
+
+.team-cell.has-data {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  transition: filter 0.1s ease;
+}
+
+.team-cell.has-data:hover { filter: brightness(0.96); }
+.team-cell.has-data:focus-visible { outline-offset: -2px; }
+
+.run-row-empty td { color: var(--ink-faint); }
+
+/* ---------------------------------------------------------------------
+   Run details panel: photos + comments
+--------------------------------------------------------------------- */
+.details-row td { padding: 0; border: 1px solid var(--grid-line); }
+
+.details-panel {
+  background: var(--surface-sunken);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.run-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* The literal 5in x 5in cap from the brief — CSS absolute units convert
+   at 96px/inch, so this is a true physical-size ceiling regardless of
+   the source image's resolution. Only ever shrinks, never upscales. */
+.run-photos img {
+  max-width: 5in;
+  max-height: 5in;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--lane);
+  display: block;
+}
+
+.comment-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment {
+  font-size: 13.5px;
+  line-height: 1.5;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.comment-author {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  color: var(--clay-dark);
+  margin-right: 8px;
+}
+
+.comment-body { color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+
+.comment-empty {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.comment-form textarea {
+  flex: 1;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 13.5px;
+  padding: 8px 10px;
+  border: 1px solid var(--lane);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.comment-form textarea:focus { outline: none; border-color: var(--clay); }
+
+/* ---------------------------------------------------------------------
+   Add/edit run: image link + file inputs
+--------------------------------------------------------------------- */
+.image-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-inputs input[type="url"] {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 14px;
+  padding: 8px 11px;
+  border: 1px solid var(--lane);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+
+.image-inputs input[type="url"]:focus { outline: none; border-color: var(--clay); background: var(--surface); }
+
+.image-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.image-input-row input[type="url"] { flex: 1; min-width: 0; }
+
+.image-input-or {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  flex: none;
+}
+
+.image-input-row input[type="file"] {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* Premium-required notice, reused in Settings and the run-log modal */
+.settings-locked {
+  background: var(--surface-sunken);
+  border: 1px dashed var(--lane-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0;
+}
+
+.settings-locked a { color: var(--clay); font-weight: 600; }
+
+/* ---------------------------------------------------------------------
+   Team popup (a day's runs for one runner)
+--------------------------------------------------------------------- */
+.modal-body { padding: 4px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+
+.popup-run {
+  border: 1px solid var(--lane);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: var(--surface-sunken);
+}
+
+.popup-run-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.popup-run-activity {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.popup-run-quality {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--turf);
+}
+
+.popup-run-stats {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.popup-run-desc {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------------------------------
+   Server-rendered SVG charts (no JS charting library / CDN — the bars
+   are plain <rect> elements computed on the server, stacked by activity
+   type so each week's mix of workouts is visible at a glance)
+--------------------------------------------------------------------- */
+.chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-gridline {
+  stroke: #e4e0d3;
+  stroke-width: 1;
+}
+
+.chart-axis-line {
+  stroke: var(--lane-strong);
+  stroke-width: 1;
+}
+
+.chart-axis-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  fill: var(--ink-soft);
+}
+
+.chart-x-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  fill: var(--ink-soft);
+}
+
+.chart-bar-segment {
+  stroke: var(--surface);
+  stroke-width: 1;
+}
+
+.chart-bar-empty {
+  fill: var(--lane);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  padding: 10px 4px 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.chart-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--grid-line);
+  margin-right: 6px;
+  flex: none;
+}
+
+.chart-swatch-solid { background: var(--swatch-color); }
+
+.chart-swatch-stripes {
+  background-color: var(--surface-sunken);
+  background-color: color-mix(in srgb, var(--swatch-color) 22%, white);
+  background-image: repeating-linear-gradient(45deg, var(--swatch-color) 0 2px, transparent 2px 5px);
+}
+
+.chart-swatch-dots {
+  background-color: var(--surface-sunken);
+  background-image: radial-gradient(var(--swatch-color) 32%, transparent 33%);
+  background-size: 6px 6px;
+}
+
+/* ---------------------------------------------------------------------
+   Comment delete (log owner only)
+--------------------------------------------------------------------- */
+.comment-body { flex: 1; }
+
+.comment-delete-form { flex: none; }
+
+.comment-delete-btn {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.comment-delete-btn:hover { opacity: 1; }
+
+/* ---------------------------------------------------------------------
+   My Team: star column
+--------------------------------------------------------------------- */
+.star-col {
+  width: 34px;
+  text-align: center !important;
+  padding-left: 10px !important;
+  padding-right: 4px !important;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--lane-strong);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.star-btn:hover { color: var(--amber); }
+.star-btn.is-starred { color: var(--amber); }
+
+/* ---------------------------------------------------------------------
+   Threaded replies
+--------------------------------------------------------------------- */
+.comment-block { display: flex; flex-direction: column; gap: 6px; }
+
+.comment-replies {
+  margin-left: 22px;
+  padding-left: 12px;
+  border-left: 2px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reply-toggle {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.reply-toggle:hover { opacity: 1; }
+
+.reply-form {
+  margin-left: 22px;
+}
+
+/* ---------------------------------------------------------------------
+   Settings page
+--------------------------------------------------------------------- */
+.settings-title { margin: 0 auto 18px; max-width: 420px; }
+
+.settings-card {
+  margin: 0 auto 18px;
+}
+
+.settings-heading {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0 0 14px;
+}
+
+.settings-subheading {
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 6px 0 0;
+}
+
+.settings-note { margin: 0 0 12px; line-height: 1.5; }
+
+.settings-inline-form { display: flex; }
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.checkbox-field input { width: 16px; height: 16px; accent-color: var(--clay); }

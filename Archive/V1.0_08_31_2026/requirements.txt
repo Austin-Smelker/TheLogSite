@@ -1,0 +1,4 @@
+Flask>=3.0
+cryptography>=42.0
+pywebpush>=2.0
+Pillow>=10.0

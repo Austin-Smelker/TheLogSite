@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_run_row.html" import run_row with context %}
+{% block title %}{{ day_label }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="log-header">
+  <h1 class="page-title">{{ day_label }}</h1>
+  <div class="week-nav">
+    <a href="{{ url_for('team_day', date_str=prev_day) }}" class="btn btn-ghost btn-small">&larr; Prev day</a>
+    {% if not is_today %}
+    <a href="{{ url_for('team_day', date_str=next_day) }}" class="btn btn-ghost btn-small">Next day &rarr;</a>
+    {% else %}
+    <span class="btn btn-ghost btn-small btn-disabled">Next day &rarr;</span>
+    {% endif %}
+  </div>
+</section>
+
+<section class="log">
+  <div class="table-scroll">
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Runner</th>
+          <th>AM/PM</th>
+          <th>Activity</th>
+          <th>Shoes</th>
+          <th class="num">Distance</th>
+          <th class="num">Time</th>
+          <th class="num">Sleep</th>
+          <th class="num">RHR</th>
+          <th class="num">Quality</th>
+          <th>Description</th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          {% if row.runs %}
+            {% for run in row.runs %}
+              {{ run_row(run, editable=False, show_date=False, runner_username=row.user.username) }}
+            {% endfor %}
+          {% else %}
+          <tr class="run-row-empty">
+            <td><a class="runner-link" href="{{ url_for('user_profile', username=row.user.username) }}">{{ row.user.username }}</a></td>
+            <td colspan="10" class="desc">No runs logged this day.</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}
