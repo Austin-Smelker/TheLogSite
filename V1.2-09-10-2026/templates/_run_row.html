@@ -1,0 +1,102 @@
+{% macro run_row(run, editable, show_date=True, runner_username=None) %}
+<tr class="run-row"
+    data-run-id="{{ run.id }}"
+    data-date="{{ run.date }}"
+    data-am-pm="{{ run.am_pm }}"
+    data-activity-type="{{ run.activity_type }}"
+    data-shoe-id="{{ run.shoe_id or '' }}"
+    data-distance="{{ run.distance if run.distance is not none else '' }}"
+    data-time="{{ run.time_display }}"
+    data-sleep-hours="{{ run.sleep_hours if run.sleep_hours is not none else '' }}"
+    data-resting-hr="{{ run.resting_hr if run.resting_hr is not none else '' }}"
+    data-description="{{ run.description }}"
+    data-quality="{{ run.quality if run.quality is not none else '' }}"
+    data-image-url-1="{{ run.image_url_1 }}"
+    data-image-url-2="{{ run.image_url_2 }}"
+    data-image-url-3="{{ run.image_url_3 }}"
+    {% if editable %}data-menstruating="{{ '1' if run.menstruating else '' }}"{% endif %}>
+  {% if show_date %}
+  <td>{{ run.weekday }} {{ run.date[5:7] }}/{{ run.date[8:10] }}</td>
+  {% else %}
+  <td><a class="runner-link" href="{{ url_for('user_profile', username=runner_username) }}">{{ runner_username }}</a></td>
+  {% endif %}
+  <td>{{ run.am_pm }}</td>
+  <td>{{ run.activity_type }}{% if editable and run.menstruating %} <span class="menstruating-tag" title="Menstruating">&#9679;</span>{% endif %}</td>
+  <td>{{ run.shoe_label or '—' }}</td>
+  <td class="num">{{ '%.2f'|format(run.distance) if run.distance is not none else '—' }}</td>
+  <td class="num">{{ run.time_display or '—' }}</td>
+  <td class="num">{{ run.sleep_hours if run.sleep_hours is not none else '—' }}</td>
+  <td class="num">{{ run.resting_hr if run.resting_hr is not none else '—' }}</td>
+  <td class="num">{{ run.quality if run.quality is not none else '—' }}</td>
+  <td class="desc">{{ run.description or '—' }}</td>
+  <td class="actions-col">
+    <button type="button" class="icon-btn details-toggle" data-target="details-row-{{ run.id }}">Details{% if run.comments|length %} ({{ run.comments|length }}){% endif %}</button>
+    {% if editable %}
+    <button type="button" class="icon-btn edit-run" title="Edit run">Edit</button>
+    <form method="post" action="{{ url_for('delete_run', run_id=run.id) }}" class="inline-form" onsubmit="return confirm('Delete this run?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="icon-btn danger" title="Delete run">Delete</button>
+    </form>
+    {% endif %}
+  </td>
+</tr>
+<tr class="details-row" id="details-row-{{ run.id }}" hidden>
+  <td colspan="11">
+    <div class="details-panel">
+      {% if run.images %}
+      <div class="run-photos">
+        {% for img in run.images %}
+        <img src="{{ img }}" alt="Photo from {{ run.owner_username }}'s {{ run.activity_type }} on {{ run.date }}" loading="lazy" referrerpolicy="no-referrer">
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% macro comment_row(c) %}
+      <div class="comment">
+        <span class="comment-author">{{ c.author_username }}</span>
+        <span class="comment-body">{{ c.body }}</span>
+        {% if editable %}
+        <form method="post" action="{{ url_for('delete_comment', comment_id=c.id) }}" class="inline-form comment-delete-form" onsubmit="return confirm('Delete this comment?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <button type="submit" class="icon-btn danger comment-delete-btn" title="Delete comment">Delete</button>
+        </form>
+        {% endif %}
+        <button type="button" class="icon-btn reply-toggle" data-target="reply-form-{{ c.id }}">Reply</button>
+      </div>
+      <form method="post" action="{{ url_for('add_run_comment', run_id=run.id) }}" class="comment-form reply-form" id="reply-form-{{ c.id }}" hidden>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <input type="hidden" name="parent_id" value="{{ c.id }}">
+        <textarea name="body" rows="2" maxlength="2000" placeholder="Reply to {{ c.author_username }}…" required></textarea>
+        <button type="submit" class="btn btn-ghost btn-small">Reply</button>
+      </form>
+      {% endmacro %}
+
+      <div class="comment-thread">
+        {% for c in run.comments %}
+        <div class="comment-block">
+          {{ comment_row(c) }}
+          {% if c.replies %}
+          <div class="comment-replies">
+            {% for r in c.replies %}
+            {{ comment_row(r) }}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="comment-empty">No comments yet.</p>
+        {% endfor %}
+      </div>
+
+      <form method="post" action="{{ url_for('add_run_comment', run_id=run.id) }}" class="comment-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <textarea name="body" rows="2" maxlength="2000" placeholder="Add a comment…" required></textarea>
+        <button type="submit" class="btn btn-ghost btn-small">Post</button>
+      </form>
+    </div>
+  </td>
+</tr>
+{% endmacro %}

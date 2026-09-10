@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Log in — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1 class="page-title">Log in</h1>
+  <form method="post" action="{{ url_for('login') }}" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>Username</span>
+      <input type="text" name="username" value="{{ username }}" autocomplete="username" required autofocus>
+    </label>
+    <label class="field">
+      <span>Password</span>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn-primary btn-full">Log in</button>
+  </form>
+  <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+</section>
+{% endblock %}

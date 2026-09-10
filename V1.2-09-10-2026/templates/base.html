@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" data-theme="{{ current_user.theme if current_user else 'light' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ site_name }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% if current_user %}<meta name="vapid-public-key" content="{{ vapid_public_key }}">{% endif %}
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="pat-stripes-clay" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#f3e1da"/>
+      <path d="M0,8 L8,0" stroke="#b14a2e" stroke-width="3"/>
+    </pattern>
+    <pattern id="pat-stripes-turf" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#e2ecdf"/>
+      <path d="M0,8 L8,0" stroke="#3f6b4a" stroke-width="3"/>
+    </pattern>
+    <pattern id="pat-stripes-ink" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#dedcd6"/>
+      <path d="M0,8 L8,0" stroke="#1e2a24" stroke-width="3"/>
+    </pattern>
+    <pattern id="pat-stripes-amber" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#f2e6cd"/>
+      <path d="M0,8 L8,0" stroke="#c9891f" stroke-width="3"/>
+    </pattern>
+    <pattern id="pat-dots-grey" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#eeede7"/>
+      <circle cx="4" cy="4" r="1.6" fill="#8a8f80"/>
+    </pattern>
+  </defs>
+</svg>
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="wordmark">{{ site_name }}</span>
+    {% if current_user %}
+    <nav class="tabs">
+      <a href="{{ url_for('home') }}" class="tab {{ 'is-active' if active_tab == 'home' else '' }}">Home</a>
+      <a href="{{ url_for('shoes') }}" class="tab {{ 'is-active' if active_tab == 'shoes' else '' }}">Shoes</a>
+      <a href="{{ url_for('team') }}" class="tab {{ 'is-active' if active_tab == 'team' else '' }}">My Team</a>
+      <a href="{{ url_for('settings') }}" class="tab {{ 'is-active' if active_tab == 'settings' else '' }}">Settings</a>
+    </nav>
+    <div class="topbar-user">
+      <span class="topbar-username-link">{{ current_user.username }}</span>
+      <form method="post" action="{{ url_for('logout') }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="link-btn">Log out</button>
+      </form>
+    </div>
+    {% else %}
+    <nav class="tabs">
+      <a href="{{ url_for('login') }}" class="tab {{ 'is-active' if active_tab == 'login' else '' }}">Log in</a>
+      <a href="{{ url_for('register') }}" class="tab {{ 'is-active' if active_tab == 'register' else '' }}">Sign up</a>
+    </nav>
+    {% endif %}
+  </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-wrap">
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<main class="page">
+  {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

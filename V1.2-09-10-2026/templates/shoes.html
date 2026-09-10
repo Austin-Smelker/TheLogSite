@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Shoes — {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="log-header">
+  <h1 class="page-title">Shoe Rack</h1>
+  <button type="button" class="btn btn-primary" id="openAddShoe">+ Add shoe</button>
+</section>
+
+<section class="log">
+  {% if not shoes %}
+    <div class="empty-state">
+      <p>No shoes on the rack yet.</p>
+      <p class="empty-sub">Add a pair here so it shows up when you log a run.</p>
+    </div>
+  {% else %}
+  <div class="table-scroll">
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Date added</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Nickname</th>
+          <th class="num">Price</th>
+          <th>Status</th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in shoes %}
+        <tr class="{{ '' if s.active else 'is-retired' }}">
+          <td>{{ s.date_added }}</td>
+          <td>{{ s.brand }}</td>
+          <td>{{ s.model }}</td>
+          <td>{{ s.nickname or '—' }}</td>
+          <td class="num">{{ '$%.2f'|format(s.price) if s.price is not none else '—' }}</td>
+          <td>
+            <span class="status-pill {{ 'status-active' if s.active else 'status-retired' }}">
+              {{ 'Active' if s.active else 'Retired' }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <form method="post" action="{{ url_for('toggle_shoe', shoe_id=s.id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="icon-btn {{ '' if s.active else 'accent' }}">
+                {{ 'Retire' if s.active else 'Reactivate' }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+<div class="modal-overlay" id="shoeModalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add a shoe</h2>
+      <button type="button" class="modal-close" id="closeAddShoe" aria-label="Close">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('add_shoe') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-grid">
+        <label class="field">
+          <span>Brand</span>
+          <input type="text" name="brand" placeholder="Nike" required>
+        </label>
+        <label class="field">
+          <span>Model</span>
+          <input type="text" name="model" placeholder="Pegasus 41" required>
+        </label>
+        <label class="field">
+          <span>Nickname</span>
+          <input type="text" name="nickname" placeholder="Daily trainer">
+        </label>
+        <label class="field">
+          <span>Price</span>
+          <input type="number" step="0.01" min="0" name="price" placeholder="140.00">
+        </label>
+        <label class="field">
+          <span>Date added</span>
+          <input type="date" name="date_added" value="{{ today }}" required>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cancelAddShoe">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add shoe</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

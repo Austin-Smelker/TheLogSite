@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}My Team — {{ site_name }}{% endblock %}
+
+{% block content %}
+
+<section class="log-header">
+  <h1 class="page-title">My Team</h1>
+  <div class="week-nav">
+    <a href="{{ url_for('team', week=prev_week) }}" class="btn btn-ghost btn-small">&larr; Prev week</a>
+    <span class="week-nav-label">{{ week_label }}</span>
+    {% if not is_current_week %}
+    <a href="{{ url_for('team', week=next_week) }}" class="btn btn-ghost btn-small">Next week &rarr;</a>
+    {% else %}
+    <span class="btn btn-ghost btn-small btn-disabled">Next week &rarr;</span>
+    {% endif %}
+  </div>
+</section>
+
+<section class="log">
+  {% if not grid %}
+  <div class="empty-state"><p>No runners yet.</p></div>
+  {% else %}
+  <div class="table-scroll">
+    <table class="log-table team-grid">
+      <thead>
+        <tr>
+          <th class="star-col"></th>
+          <th>Runner</th>
+          {% for d in week_days %}
+          <th><a href="{{ url_for('team_day', date_str=d.isoformat()) }}">{{ d.strftime('%a') }}<br>{{ d.month }}/{{ d.day }}</a></th>
+          {% endfor %}
+          <th class="num">Week&nbsp;mi</th>
+          <th class="num">Week&nbsp;time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in grid %}
+        <tr>
+          <td class="star-col">
+            {% if row.user.id != current_user.id %}
+            <form method="post" class="inline-form" action="{{ url_for('unstar_user_route' if row.starred else 'star_user_route', user_id=row.user.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="next" value="{{ request.full_path }}">
+              <button type="submit" class="star-btn {{ 'is-starred' if row.starred else '' }}" title="{{ 'Unstar' if row.starred else 'Star' }} {{ row.user.username }}">&#9733;</button>
+            </form>
+            {% endif %}
+          </td>
+          <td><a class="runner-link" href="{{ url_for('user_profile', username=row.user.username) }}">{{ row.user.username }}</a></td>
+          {% for day in row.days %}
+          <td class="team-cell {{ 'has-data' if day.has_runs else '' }}"
+              {% if day.has_runs %}data-cell-key="{{ row.user.id }}_{{ day.date }}" role="button" tabindex="0"{% endif %}
+              {% if day.color %}style="background-color: {{ day.color }};"{% endif %}>
+            {{ '%.1f'|format(day.distance) if day.distance is not none else '—' }}
+          </td>
+          {% endfor %}
+          <td class="num">{{ row.week_distance }}</td>
+          <td class="num">{{ row.week_time }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="log-footnote">Starred runners are pinned to the top ({{ star_count }}/{{ max_stars }} starred). Cell color reflects that day's average run quality (red = low, green = high). Click a cell to see that day's runs; click a runner's name to see their full log.</p>
+  {% endif %}
+</section>
+
+<div class="modal-overlay" id="teamPopupOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="teamPopupTitle">Runs</h2>
+      <button type="button" class="modal-close" id="closeTeamPopup" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="teamPopupBody"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.TEAM_POPUP_DATA = {{ popup_data | tojson }};
+</script>
+{% endblock %}
